@@ -130,9 +130,8 @@ public:
     }
 
     SingleLinkedList(const SingleLinkedList& other)
-        : size_(other.size_) // <- ИНИЦИАЛИЗАЦИЯ РАЗМЕРНОСТИ ПРОИЗВОДИТСЯ ОТДЕЛЬНО
-    {
-        assert(size_ == 0 && head_.next_node == nullptr);
+        : size_(other.size_)  
+    { 
         AddToHead(other.begin(), other.end());
     }
 
@@ -329,7 +328,7 @@ void swap(SingleLinkedList<Type>& lhs, SingleLinkedList<Type>& rhs) noexcept {
 
 template <typename Type>
 bool operator==(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    return (lhs.GetSize() == rhs.GetSize()) () && &&std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
+    return (lhs.GetSize() == rhs.GetSize()) && std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 }
 
 template <typename Type>
@@ -356,5 +355,5 @@ bool operator>(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& 
 
 template <typename Type>
 bool operator>=(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    return !(lhs < lhs);
+    return !(rhs < lhs);
 }
