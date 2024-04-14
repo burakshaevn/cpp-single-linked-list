@@ -132,37 +132,29 @@ public:
     {}
 
     SingleLinkedList(std::initializer_list<Type> values) {
-        // Создает временный пустой список, который будет использоваться для построения списка 'this' из списка tmp_reverse
-        SingleLinkedList tmp;
-        SingleLinkedList tmp_reverse;
-
-        for (auto it = values.begin(); it != values.end(); ++it) {
-            tmp_reverse.PushFront(*it);
-        }
-        for (auto it = tmp_reverse.begin(); it != tmp_reverse.end(); ++it) {
-            tmp.PushFront(*it);
-        }
-
-        swap(tmp);
+        AddToHead(values.begin(), values.end());
     }
 
     SingleLinkedList(const SingleLinkedList& other)
         : size_(other.size_) // <- ИНИЦИАЛИЗАЦИЯ РАЗМЕРНОСТИ ПРОИЗВОДИТСЯ ОТДЕЛЬНО
     {
-        //assert(size_ == 0 && hea d_.next_node == nullptr);
-        if (size_ != 0 || head_.next_node != nullptr) {
-            Clear();
-        }
-        SingleLinkedList tmp;
-        SingleLinkedList tmp_reverse;
+        assert(size_ == 0 && head_.next_node == nullptr);
+        AddToHead(other.begin(), other.end());
+    }
 
-        for (auto it = other.begin(); it != other.end(); ++it) {
-            tmp_reverse.PushFront(*it);
-        }
-        for (auto it = tmp_reverse.begin(); it != tmp_reverse.end(); ++it) {
-            tmp.PushFront(*it);
-        }
+    template <typename InputIterator>
+    void AddToHead(InputIterator from, InputIterator to) {
+        SingleLinkedList<Type> tmp;
+        Node** node_ptr = &tmp.head_.next_node;
 
+        while (from != to) {
+            assert(*node_ptr == nullptr);
+
+            *node_ptr = new Node(*from, nullptr);
+            ++tmp.size_;
+            node_ptr = &((*node_ptr)->next_node);
+            ++from;
+        }
         swap(tmp);
     }
 
@@ -195,14 +187,14 @@ public:
     // Если список пустой, возвращённый итератор будет равен end()
     // Результат вызова эквивалентен вызову метода cbegin()
     [[nodiscard]] ConstIterator begin() const noexcept {
-        return ConstIterator{ head_.next_node };
+        return cbegin();
     }
 
     // Возвращает константный итератор, указывающий на позицию, следующую за последним элементом односвязного списка
     // Разыменовывать этот итератор нельзя — попытка разыменования приведёт к неопределённому поведению
     // Результат вызова эквивалентен вызову метода cend()
     [[nodiscard]] ConstIterator end() const noexcept {
-        return ConstIterator{ nullptr };
+        return cend();
     }
 
     // Возвращает константный итератор, ссылающийся на первый элемент
@@ -256,18 +248,8 @@ public:
     /*Она имеет доступ к закрытой области класса и может непосредственно взаимодействовать с его членами.
     Это удобно, если вам нужно обменивать содержимое двух списков одного и того же типа.*/
     void swap(SingleLinkedList& other) noexcept {
-        Node* temp_head = head_.next_node;
-        size_t temp_size = size_;
-
-        head_.next_node = other.head_.next_node; // меняем головы
-        size_ = other.size_; // меняем размеры
-
-        other.head_.next_node = temp_head;
-        other.size_ = temp_size;
-
-        /* ИЛИ с использованием STL
         std::swap(head_.next_node, other.head_.next_node);
-        std::swap(size_, other.size_); */
+        std::swap(size_, other.size_);
     }
 
     /* Возвращает итератор на фиктивный узел, который расположен перед началом списка.
@@ -353,21 +335,7 @@ void swap(SingleLinkedList<Type>& lhs, SingleLinkedList<Type>& rhs) noexcept {
 
 template <typename Type>
 bool operator==(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    if (lhs.GetSize() != rhs.GetSize()) {
-        return false;
-    }
-    else {
-        auto it1 = lhs.begin();
-        auto it2 = rhs.begin();
-        while (it1 != lhs.end() and it2 != rhs.end()) {
-            if (*it1 != *it2) {
-                return false;
-            }
-            ++it1;
-            ++it2;
-        }
-        return true;
-    }
+    return std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 }
 
 template <typename Type>
@@ -377,28 +345,12 @@ bool operator!=(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>&
 
 template <typename Type>
 bool operator<(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    auto it1 = lhs.begin();
-    auto it2 = rhs.begin();
-
-    while (it1 != lhs.end() && it2 != rhs.end()) {
-        // Если элементы не равны, возвращаем результат сравнения
-        if (*it1 != *it2) {
-            return *it1 < *it2;
-        }
-        ++it1;
-        ++it2;
-    }
-
-    // Если дошли до конца одного из списков, сравниваем их размеры
-    return (lhs.GetSize() < rhs.GetSize());
-
-    /* ИЛИ
-    return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); */
+    return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 }
 
 template <typename Type>
 bool operator<=(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    return (lhs < rhs) or (lhs == rhs);
+    return !(rhs < lhs);
     // list1 <= list2 — противоположно list2 < list1
 }
 
@@ -410,6 +362,5 @@ bool operator>(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& 
 
 template <typename Type>
 bool operator>=(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    return !(lhs > lhs) or (lhs == rhs);
+    return !(lhs < lhs);
 }
-
