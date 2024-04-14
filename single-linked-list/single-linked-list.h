@@ -1,10 +1,4 @@
-﻿#pragma once
-
-#include <cstddef>
-#include <string>
-#include <utility>
-
-template <typename Type>
+﻿template <typename Type>
 class SingleLinkedList {
     // Узел списка
     struct Node {
@@ -335,7 +329,7 @@ void swap(SingleLinkedList<Type>& lhs, SingleLinkedList<Type>& rhs) noexcept {
 
 template <typename Type>
 bool operator==(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    return std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
+    return (lhs.GetSize() == rhs.GetSize()) () && &&std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin());
 }
 
 template <typename Type>
